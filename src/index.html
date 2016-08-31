@@ -28,8 +28,8 @@
 
         handleSubmit: function(task){
             var data = this.state.data;
-            data.concat([{ task }]);
-            this.setState(data);
+            data = data.concat([{task}]);
+            this.setState({data});
         },
 
         render: function() {
@@ -37,6 +37,7 @@
                     <div className="well">
                         <h1 className="vert-offset-top-0">Yapılacaklar:</h1>
                         <TodoList data={this.state.data}  />
+                        <TodoForm onSubmit={this.handleSubmit} />
                     </div>
             );
         }
@@ -46,10 +47,10 @@
         render : function(){
             var list = this.props.data.map(function (item) {
                 return <TodoItem task={item.task} />
-            });
+            },this);
             return  (<ul className="list-group">
                          {list}
-                     </ul>) ;
+                     </ul> ) ;
         }
 
     });
@@ -58,16 +59,48 @@
 
         render: function () {
             return (
-                    <li className="list-group-item-success">
+                    <li className="list-group-item clearfix list-group-item-success">
                         {this.props.task}
                         <div className="pull-right" role="group">
-                            <button type="button" className="btn btn-xs btn-success img-circle" >Yapıldı</button>
-                            <button type="button" className="btn btn-xs btn-danger img-circle" >Sil</button>
+                            <button type="button" className="btn btn-xs btn-success img-circle" >&#x2713;</button>
+                            <button type="button" className="btn btn-xs btn-danger img-circle" >&#xff38;</button>
                         </div>
                     </li>
             );
         }
     });
+    var TodoForm = React.createClass({
+        doSubmit : function (e) {
+            e.preventDefault();
+            var task = React.findDOMNode(this.refs.task).value.trim();
+            this.props.onSubmit(task);
+            React.findDOMNode(this.refs.task).value = "";
+            return;
+        },
+        render: function() {
+            return (
+                    <div className="commentForm vert-offset-top-2">
+                        <hr />
+                        <div className="clearfix">
+                            <form className="todoForm form-horizontal" onSubmit={this.doSubmit}>
+                                <div className="form-group">
+                                    <label htmlFor="task" className="col-md-2 control-label">Task</label>
+                                    <div className="col-md-10">
+                                        <input type="text" id="task" ref="task" className="form-control" placeholder="Ne planlamak istiyorsun ?" />
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-md-10 col-md-offset-2 text-right">
+                                        <input type="submit" value="Save" className="btn btn-primary" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+            );
+        }
+    });
+
 
     React.render(<Todo />,document.getElementById("container"));
 
