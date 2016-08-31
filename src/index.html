@@ -31,20 +31,20 @@
         },
         handleNodeRemoval : function (nodeId) {
             var data = this.state.data;
-            data = data.filter(function(e){
-               return e.id !== nodeId;
+            data = data.filter(function(el){
+               return el.id !== nodeId;
             });
             this.setState({data});
             return;
         },
-        handleSubmit: function(task){
+        handleSubmit: function (task){
             var data = this.state.data;
             var id = this.generateId().toString();
             var complete = "false";
             data = data.concat([{id,task,complete}]);
             this.setState({data});
         },
-        handleToggleComplete : function (nodeId) {
+        handleToggleComplete: function (nodeId) {
             var data = this.state.data;
             for(var i in data){
                 if(data[i].id == nodeId){
@@ -54,21 +54,19 @@
             }
             this.setState({data});
             return;
-
         },
         render: function() {
             return (
                     <div className="well">
                         <h1 className="vert-offset-top-0">Yapılacaklar:</h1>
                         <TodoList data={this.state.data} removeNode={this.handleNodeRemoval} toggleComplete={this.handleToggleComplete} />
-                        <TodoForm onSubmit={this.handleSubmit} />
+                        <TodoForm onTaskSubmit={this.handleSubmit} />
                     </div>
             );
         }
     });
 
     var TodoList = React.createClass({
-
         removeNode: function (nodeId) {
             this.props.removeNode(nodeId);
             return;
@@ -78,23 +76,26 @@
             return;
         },
         render : function(){
-            var list = this.props.data.map(function (item) {
-                return <TodoItem key={item.id}
-                                 nodeId={item.id}
-                                 task={item.task}
-                                 complete={item.complete}
+            var listNodes = this.props.data.map(function (listItem) {
+                return <
+                        TodoItem key={listItem.id}
+                                 nodeId={listItem.id}
+                                 task={listItem.task}
+                                 complete={listItem.complete}
                                  removeNode={this.removeNode}
                                  toggleComplete={this.toggleComplete} />
             },this);
-            return  (<ul className="list-group">
-                         {list}
-                     </ul> ) ;
+            return  (
+                    <ul className="list-group">
+                         {listNodes}
+                     </ul>
+            );
         }
 
     });
 
     var TodoItem = React.createClass({
-        removeNode : function (e) {
+        removeNode: function (e) {
             e.preventDefault();
             this.props.removeNode(this.props.nodeId);
             return;
@@ -113,8 +114,8 @@
                     <li className={classes}>
                         {this.props.task}
                         <div className="pull-right" role="group">
-                            <button type="button" className="btn btn-xs btn-success img-circle" onclick={this.toggleComplete} >Yapıldı</button>
-                            <button type="button" className="btn btn-xs btn-danger img-circle" onclick={this.removeNode} >Sil</button>
+                            <button type="button" className="btn btn-xs btn-success img-circle" onclick={this.toggleComplete}>Yapıldı</button>
+                            <button type="button" className="btn btn-xs btn-danger img-circle" onclick={this.removeNode}>Sil</button>
                         </div>
                     </li>
             );
@@ -128,7 +129,7 @@
             if(!task){
                 return;
             }
-            this.props.onSubmit(task);
+            this.props.onTaskSubmit(task);
             React.findDOMNode(this.refs.task).value = "";
             return;
         },
