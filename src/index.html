@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link href="Style.css" type="text/css" rel="stylesheet" />
+    <link href="Style.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
 <section class="container vert-offset-top-2">
@@ -17,50 +17,87 @@
 
     var Todo = React.createClass({
 
-        getInitialState: function(){
+        componentWillMount: function () {
+            console.log("Bileşen oluşturulmadan önce-----componentWillMount--------");
+        },
+        componentDidMount: function () {
+            console.log("Bileşen oluşturulduktan sonra-----componentDidMount--------");
+        },
+        componentWillReceiveProps: function (nextProps) {
+            console.log("Yeni props eklenmeden önce-----componentWillReceiveProps--------");
+            if(!nextProps){
+                return;
+            }
+        },
+        shouldComponentUpdate: function (nextProps, nextState) {
+            console.log("Bileşenin güncellenip güncellenmeyeceği kararı verilir -----shouldComponentUpdate--------");
+            if (nextState.count > this.state.count) {
+                return true;
+            }
+        },
+        componentWillUpdate: function (nextProps, nextState) {
+            console.log("Bileşen güncellenmeden önce-----componentWillUpdate--------");
+        },
+        componentDidUpdate: function (prevProps, prevState) {
+            console.log("Bileşen güncellendikten sonra-----componentDidUpdate--------");
+
+        },
+        componentWillUnmount: function () {
+            console.log("Bileşen DOM’dan silinmeden önce -----componentWillUnmount--------");
+        },
+
+
+        getInitialState: function () {
             return {
-               data: [
-                   {"id":"00001","task":"Kod yaz","complete":"false"},
-                   {"id":"00002","task":"Yüzünü yıka","complete":"false"},
-                   {"id":"00003","task":"React öğren","complete":"false"}
-               ]
+                data: [
+                    {"id": "00001", "task": "Kod yaz", "complete": "false"},
+                    {"id": "00002", "task": "Yüzünü yıka", "complete": "false"},
+                    {"id": "00003", "task": "React öğren", "complete": "false"}
+                ],
+                count: 0,
+                text : ""
             };
         },
-        generateId : function () {
-            return Math.floor(Math.random()*90000) + 10000;
+
+        generateId: function () {
+            return Math.floor(Math.random() * 90000) + 10000;
         },
-        handleNodeRemoval : function (nodeId) {
-            var data = this.state.data;
-            data = data.filter(function(el){
-               return el.id !== nodeId;
+        handleNodeRemoval: function (nodeId) {
+            var data = this.state.data.filter(function (el) {
+                return el.id !== nodeId;
             });
-            this.setState({data});
+            var count = this.state.count + 1;
+            this.setState({data:data, count: count});
             return;
         },
-        handleSubmit: function (task){
+        handleSubmit: function (task) {
             var data = this.state.data;
             var id = this.generateId().toString();
             var complete = "false";
-            data = data.concat([{id,task,complete}]);
-            this.setState({data});
+            var count = this.state.count +1;
+            data = data.concat([{id, task, complete}]);
+            this.setState({data:data,count:count});
         },
         handleToggleComplete: function (nodeId) {
             var data = this.state.data;
-            for(var i in data){
-                if(data[i].id == nodeId){
+            for (var i in data) {
+                if (data[i].id == nodeId) {
                     data[i].complete = data[i].complete === "true" ? "false" : "true";
                     break;
                 }
             }
-            this.setState({data});
+            var count = this.state.count + 1;
+            this.setState({data:data,count:count});
             return;
         },
-        render: function() {
+        render: function () {
             return (
                     <div className="well">
                         <h1 className="vert-offset-top-0">Yapılacaklar:</h1>
-                        <TodoList data={this.state.data} removeNode={this.handleNodeRemoval} toggleComplete={this.handleToggleComplete} />
-                        <TodoForm onTaskSubmit={this.handleSubmit} />
+                        <h1>{this.state.count} tane güncelleme yaptınız</h1>
+                        <TodoList data={this.state.data} removeNode={this.handleNodeRemoval}
+                                  toggleComplete={this.handleToggleComplete}/>
+                        <TodoForm text={this.state.text} onTaskSubmit={this.handleSubmit}/>
                     </div>
             );
         }
@@ -71,11 +108,11 @@
             this.props.removeNode(nodeId);
             return;
         },
-        toggleComplete : function (nodeId) {
+        toggleComplete: function (nodeId) {
             this.props.toggleComplete(nodeId);
             return;
         },
-        render : function(){
+        render: function () {
             var listNodes = this.props.data.map(function (listItem) {
                 return <
                         TodoItem key={listItem.id}
@@ -83,12 +120,12 @@
                                  task={listItem.task}
                                  complete={listItem.complete}
                                  removeNode={this.removeNode}
-                                 toggleComplete={this.toggleComplete} />
-            },this);
-            return  (
+                                 toggleComplete={this.toggleComplete}/>
+            }, this);
+            return (
                     <ul className="list-group">
-                         {listNodes}
-                     </ul>
+                        {listNodes}
+                    </ul>
             );
         }
 
@@ -105,35 +142,54 @@
             this.props.toggleComplete(this.props.nodeId);
             return;
         },
+        editItem : function(e){
+            e.preventDefault();
+            var text = this.props.task;
+            console.log(text);
+            this.setState({text:text});
+            return;
+        },
         render: function () {
             var classes = 'list-group-item clearfix';
             if (this.props.complete === 'true') {
                 classes = classes + ' list-group-item-success';
             }
             return (
+                    <div>
                     <li className={classes}>
                         {this.props.task}
                         <div className="pull-right" role="group">
-                            <button type="button" className="btn btn-xs btn-success img-circle" onclick={this.toggleComplete}>Yapıldı</button>
-                            <button type="button" className="btn btn-xs btn-danger img-circle" onclick={this.removeNode}>Sil</button>
+                            <button type="button" className="btn btn-xs btn-success img-circle"
+                                    onClick={this.toggleComplete}>&#x2713;
+                            </button>
+                            <button type="button" className="btn btn-xs btn-success img-circle"
+                                    onClick={this.editItem} >&#9998;
+                            </button>
+                            <button type="button" className="btn btn-xs btn-danger img-circle"
+                                    onClick={this.removeNode}>&#xff38;
+                            </button>
                         </div>
                     </li>
+
+                    </div>
+
             );
         }
     });
 
     var TodoForm = React.createClass({
-        doSubmit : function (e) {
+        doSubmit: function (e) {
             e.preventDefault();
             var task = React.findDOMNode(this.refs.task).value.trim();
-            if(!task){
+            if (!task) {
                 return;
             }
             this.props.onTaskSubmit(task);
             React.findDOMNode(this.refs.task).value = "";
-            return;
+            return <Todo task={task}/>;
         },
-        render: function() {
+        render: function () {
+            var text = this.props.text || "Ne planlamak istiyorsun ?";
             return (
                     <div className="commentForm vert-offset-top-2">
                         <hr />
@@ -142,12 +198,13 @@
                                 <div className="form-group">
                                     <label htmlFor="task" className="col-md-2 control-label">Task</label>
                                     <div className="col-md-10">
-                                        <input type="text" id="task" ref="task" className="form-control" placeholder="Ne planlamak istiyorsun ?" />
+                                        <input type="text" id="task" ref="task" className="form-control"
+                                               placeholder={text}/>
                                     </div>
                                 </div>
                                 <div className="row">
                                     <div className="col-md-10 col-md-offset-2 text-right">
-                                        <input type="submit" value="Save" className="btn btn-primary" />
+                                        <input type="submit" value="Save" className="btn btn-primary"/>
                                     </div>
                                 </div>
                             </form>
@@ -158,7 +215,7 @@
     });
 
 
-    React.render(<Todo />,document.getElementById("container"));
+    React.render(<Todo />, document.getElementById("container"));
 
 </script>
 </body>
